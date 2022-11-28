@@ -1,9 +1,9 @@
 {
   "name": "productos",
   "version": "1.0.0",
-  "main": "src/index.js",
+  "main": "Index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node src/Index.js",
     "dev": "nodemon src/index.js"
   },
   "license": "ISC",
