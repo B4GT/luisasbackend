@@ -13,7 +13,7 @@ const LoginUsuario = async ( req = request, res = response ) => {
 
         const conn = await connet();
 
-        const existsEmail = await conn.query('SELECT id, us_email, passwordd FROM users WHERE us_email = ? LIMIT 1', [ us_email ]);
+        const existsEmail = await conn.query('SELECT id, us_email, passwordd, fk_role_id FROM users WHERE us_email = ? LIMIT 1', [ us_email ]);
 
 
         if( existsEmail[0].length === 0 ){
@@ -42,7 +42,8 @@ const LoginUsuario = async ( req = request, res = response ) => {
         conn.end();
         return res.json({
             resp: true,
-            message : 'Welcome to Frave Shop',
+            message: 'SignIn Success',
+            fk_role_id: existsEmail[0][0].fk_role_id,
             token: token
         });
 
@@ -60,10 +61,13 @@ const RenweToken = async ( req = request , res = response ) => {
 
 
     const token = await generarJsonWebToken( req.uidPerson );
-   
+    const conn = await connet();
+    const roleId = await conn.query('SELECT fk_role_id FROM users WHERE id = ?', [ req.uidPerson ]);
+    console.log('token'+roleId[0][0].fk_role_id);
     return res.json({
         resp: true,
-        message : 'Welcome to Frave Shop',
+        message: 'Welcome to Frave Shop',
+        fk_role_id: roleId[0][0].fk_role_id,
         token: token
     });
 }

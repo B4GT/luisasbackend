@@ -91,6 +91,82 @@ const changeFotoProfile = async ( req = request, res = response ) => {
     }
 }
 
+const addStreetAddress = async ( req, res = response ) => {
+
+    try {
+
+        const conn = await connect();
+
+        const { tag, reference, street, latitude, longitude } = req.body;
+
+        await conn.query('INSERT INTO address (ad_tag, ad_reference, ad_street, ad_latitude, ad_longitude, fk_us_id) VALUE (?,?,?,?,?,?)', 
+        [ tag, reference, street, latitude, longitude, req.uidPerson ]);
+        
+        await conn.end();
+
+        return res.json({
+            resp: true,
+            message : 'Street Address added successfully'
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            resp: false,
+            message : err
+        });
+    }
+
+}
+
+const deleteStreetAddress = async (req = request, res = response ) => {
+
+    try {
+
+        const conn = await connect();
+
+        await conn.query('DELETE FROM address WHERE ad_id = ? AND fk_us_id = ?', [ req.params.ad_id , req.uidPerson ]);
+
+        await conn.end();
+
+        return res.json({
+            resp: true,
+            message : 'Street Address deleted'
+        });
+        
+    } catch (err) {
+        return res.status(500).json({
+            resp: false,
+            message : err
+        });
+    }
+}
+
+const getAddressesUser = async (req, res = response ) => {
+
+    try {
+
+        const conn = await connect();
+
+        const addressesdb = await conn.query('SELECT ad_id, ad_tag, ad_reference, ad_street FROM address WHERE fk_us_id = ?', [req.uidPerson]);
+
+        await conn.end();
+
+        res.json({
+            resp: true,
+            message : 'List the Addresses',
+            listAddresses : addressesdb[0]
+        });
+        
+    } catch (err) {
+        return res.status(500).json({
+            resp: false,
+            msg : err
+        });
+    }
+
+}
+
+
 const updateInformationUser = async ( req = request, res = response ) => {
 
     try {
@@ -148,5 +224,8 @@ module.exports = {
     getUserById,
     changeFotoProfile,
     updateInformationUser,
+    addStreetAddress,
+    deleteStreetAddress,
+    getAddressesUser,
     updateStreetAddress
 }

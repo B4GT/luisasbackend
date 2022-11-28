@@ -52,6 +52,54 @@ const getListProductsHome = async (req = request, res = response) => {
     }
 }
 
+const getListPopularProductsHome= async (req = request, res = response) => {
+
+    try {
+
+        const conn = await connet();
+
+        const products = await conn.query(`CALL SP_LIST_POPULAR_PRODUCTS_HOME(?);`,[ req.uidPerson ]);
+
+        await conn.end();
+
+        return res.json({
+            resp: true,
+            message: 'Get List Popular Products for Home',
+            listProducts: products[0][0]
+        });
+        
+    } catch (err) {
+        return res.status(500).json({
+            resp: false,
+            message: err
+        });
+    }
+}
+
+const getListNewProductsHome= async (req = request, res = response) => {
+
+    try {
+
+        const conn = await connet();
+
+        const products = await conn.query(`CALL SP_LIST_NEW_PRODUCTS(?);`,[ req.uidPerson ]);
+
+        await conn.end();
+
+        return res.json({
+            resp: true,
+            message: 'Get List New Products for Home',
+            listProducts: products[0][0]
+        });
+        
+    } catch (err) {
+        return res.status(500).json({
+            resp: false,
+            message: err
+        });
+    }
+}
+
 const likeOrUnlikeProduct = async (req = request, res = response) => {
 
     try {
@@ -166,15 +214,63 @@ const getProductsForCategories = async (req = request, res = response) => {
 
 }
 
+const searchProductForName = async (req = request, res = response) => {
+   
+    try {
+        
+        const conn = await connet();
+
+        const products = await conn.query(`CALL SP_SEARCH_PRODUCT(?,?);`, [ req.uidPerson ,req.params.nameProduct]);
+
+        await conn.end();
+
+        res.json({
+            resp: true,
+            message: 'Search Products',
+            listProducts: products[0][0]
+        })
+    } catch (err) {
+        return res.status(500).json({
+            resp: false,
+            message: err
+        });
+    }
+
+}
+
+const searchProductForPrice = async (req = request, res = response) => {
+   
+    try {
+        
+        const conn = await connet();
+
+        const products = await conn.query(`CALL SP_SEARCH_PRODUCT_FOR_PRICE(?,?,?);`, [ req.uidPerson, req.params.minPrice, req.params.maxPrice]);
+
+        await conn.end();
+
+        res.json({
+            resp: true,
+            message: 'Search Products for Price',
+            listProducts: products[0][0]
+        })
+    } catch (err) {
+        return res.status(500).json({
+            resp: false,
+            message: err
+        });
+    }
+
+}
+
 const saveOrderBuyProducts = async (req = request, res = response) => {
 
    try {
        
-    const { receipt, amount, products  } = req.body;
+    const { uidAddress, receipt, amount, typePayment, products  } = req.body;
 
     const conn = await connet();
  
-    const db = await conn.query('INSERT INTO orderBuy (user_id, receipt, amount) VALUES (?,?,?)', [ req.uidPerson, receipt, amount ]);
+    const db = await conn.query('INSERT INTO orderBuy (user_id, fk_address_id, receipt, amount, pay_type) VALUES (?,?,?,?,?)', [ req.uidPerson, uidAddress, receipt, amount, typePayment]);
 
     products.forEach(e => {
         conn.query('INSERT INTO orderDetails (orderBuy_id, product_id, quantity, price) VALUES (?,?,?,?)', [db[0].insertId, e.uidProduct, e.amount, e.price]);
@@ -228,7 +324,54 @@ const getAllPurchasedProducts = async ( req, res = response ) => {
 
         const conn = await connet();
 
-        const orderbuy = await conn.query('SELECT * FROM orderBuy WHERE user_id = ?', [req.uidPerson]);
+        const orderbuy = await conn.query('CALL SP_ORDER_FOR_CLIENT(?);', [req.uidPerson]);
+
+        await conn.end();
+
+        res.json({
+            resp: true,
+            msg : 'Get Puchased Products',
+            orderClient : orderbuy[0][0],
+        });
+        
+    } catch (err) {
+        
+    }
+   
+}
+
+const getOrdersForStatus = async (req = request, res = response) => {
+
+    try {
+
+        const conn = await connet();
+
+        const products = await conn.query(`CALL SP_LIST_ORDERS_FOR_STATUS(?,?);`, [ req.params.idStatus, req.uidPerson ]); 
+
+        await conn.end();
+
+        res.json({
+            resp: true,
+            msg : 'List Orders',
+            orderBuy: products[0][0] 
+        });
+        
+    } catch (err) {
+        return res.status(500).json({
+            resp: false,
+            message: err
+        });
+    }
+
+}
+
+const getAllPendingOrders = async ( req, res = response ) => {
+
+    try {
+
+        const conn = await connet();
+
+        const orderbuy = await conn.query("SELECT * FROM orderBuy WHERE user_id = ? AND status ='Pendiente'", [req.uidPerson]);
 
         await conn.end();
 
@@ -243,6 +386,8 @@ const getAllPurchasedProducts = async ( req, res = response ) => {
     }
    
 }
+
+
 
 const getOrderDetailsProducts = async ( req, res = response ) => {
 
@@ -271,12 +416,18 @@ const getOrderDetailsProducts = async ( req, res = response ) => {
 module.exports = {
     getProductsForHomeCarousel,
     getListProductsHome,
+    getListPopularProductsHome,
+    getListNewProductsHome,
+    searchProductForName,
+    searchProductForPrice,
     likeOrUnlikeProduct,
     getAllListCategories,
     productFavoriteForUser,
     saveOrderBuyProducts,
     getProductsForCategories,
+    getOrdersForStatus,
     addNewProduct,
     getAllPurchasedProducts,
-    getOrderDetailsProducts
+    getAllPendingOrders,
+    getOrderDetailsProducts,
 }
