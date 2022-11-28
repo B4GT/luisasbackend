@@ -7,7 +7,7 @@ const updateStatusToDelivered = async ( req, res = response ) => {
         
         const conn = await connect();
 
-        await conn.query('UPDATE orderbuy SET fk_os_id = ? WHERE uidOrderBuy = ?', [ 5, req.params.idOrder ]);
+        await conn.query('UPDATE orderBuy SET fk_os_id = ? WHERE uidOrderBuy = ?', [ 5, req.params.idOrder ]);
 
         await conn.end();
 
