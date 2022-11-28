@@ -4,11 +4,11 @@ const { createPool } = require('mysql2/promise');
 
 module.exports = connect = async () => {
 
-    const connection = await createPool({
-        host: 'localhost',
-        user: 'root',
-        password: '#64AOO6@8FFBF8*',
-        database: 'productshop',
+    const connection = await createPool({        
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PASSWORD,
+        database: process.env.DATABASE,
         connectionLimit: 10
     });
 
