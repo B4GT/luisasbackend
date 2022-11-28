@@ -12,7 +12,7 @@ CREATE TABLE roles
 CREATE TABLE person
 (
 	pe_id INT PRIMARY KEY AUTO_INCREMENT,
-	firstName VARCHAR(50) NULL,
+	pe_firstName VARCHAR(50) NULL,
 	lastName VARCHAR(50) NULL,
 	phone VARCHAR(11) NULL,
 	address VARCHAR(90) NULL,
@@ -23,7 +23,7 @@ CREATE TABLE person
 CREATE TABLE users
 (
 	id INT PRIMARY KEY AUTO_INCREMENT,
-	us_name VARCHAR(50) NOT NULL,
+	users VARCHAR(50) NOT NULL,
 	us_email VARCHAR(100) NOT NULL,
 	passwordd VARCHAR(100) NOT NULL,
 	token VARCHAR(256) NULL,
@@ -43,7 +43,9 @@ CREATE TABLE Address
     ad_tag VARCHAR(50) NOT NULL,
     ad_reference VARCHAR(50) NOT NULL,
     ad_street VARCHAR(50) NOT NULL,
-    fk_us_id INT, 
+    fk_us_id INT,
+	ad_latitude VARCHAR(50),
+	ad_longitude VARCHAR(50),
     FOREIGN KEY (fk_us_id) REFERENCES users (id)
 ); 
 
@@ -90,10 +92,18 @@ CREATE TABLE orderBuy
 (
 	uidOrderBuy INT PRIMARY KEY AUTO_INCREMENT,
 	user_id INT,
+	fk_address_id INT,
+	latitude VARCHAR(50),
+	longitude VARCHAR(50),
 	receipt VARCHAR(100),
 	created_at DATETIME DEFAULT NOW(),
 	amount DOUBLE(11,2),
-	FOREIGN KEY(user_id) REFERENCES users(persona_id)
+	fk_os_id INT,
+	fk_delivery_id INT,
+	FOREIGN KEY(user_id) REFERENCES users(persona_id),
+	FOREIGN KEY(fk_address_id) REFERENCES Address(ad_id),
+	FOREIGN KEY(fk_os_id) REFERENCES order_status(os_id),
+	FOREIGN KEY (fk_delivery_id) REFERENCES person(pe_id)
 );
 
 CREATE TABLE order_status(  
